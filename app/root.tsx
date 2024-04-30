@@ -5,6 +5,24 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
+import { Web3ReactHooks, Web3ReactProvider } from "@web3-react/core";
+
+import { NextUIProvider } from "@nextui-org/react";
+import type { LinksFunction } from "@remix-run/node";
+import { MetaMask } from "@web3-react/metamask";
+import { Url } from "@web3-react/url";
+import stylesheet from "~/tailwind.css?url";
+import { metaMask, hooks as metaMaskHooks } from "./connectors/metamask";
+import { hooks as networkHooks, url } from "./connectors/urls";
+
+export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: stylesheet },
+];
+
+const connectors: [MetaMask | Url, Web3ReactHooks][] = [
+  [metaMask, metaMaskHooks],
+  [url, networkHooks],
+];
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -16,7 +34,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <NextUIProvider>
+          <Web3ReactProvider connectors={connectors}>
+            {children}
+          </Web3ReactProvider>
+        </NextUIProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
